@@ -67,27 +67,17 @@ def main(passive, verbose, lang):
 
     if passive:
         # paste and re-copy
-        s = ""
-        for line in sys.stdin:
-            s += line
-        click.echo(Text(s, lang=lang).clean)
+        while True:
+            s = "".join(sys.stdin.readlines())
+            click.echo(Text(s, lang=lang).clean)
 
     else:
         # read clipboard and re-copy
-        # initial
-        tmpText = Text(pyperclip.paste(), lang=lang)
-        copy_echo(tmpText.clean, verbose=verbose)
-        time.sleep(2)
-
-        # loop
+        clipText = Text(pyperclip.waitForPaste(), lang=lang)
+        copy_echo(clipText.clean, verbose=verbose)
         while True:
-            newText = Text(pyperclip.paste(), lang=lang)
-            if newText.raw == tmpText.raw or newText.raw == tmpText.clean:
-                continue
-            copy_echo(newText.clean, verbose=verbose)
-
-            tmpText = newText
-            time.sleep(2)
+            clipText = Text(pyperclip.waitForNewPaste(), lang=lang)
+            copy_echo(clipText.clean, verbose=verbose)
 
 
 if __name__ == "__main__":
